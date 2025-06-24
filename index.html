@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="hr" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Infografika: Putovanje Diffie-Hellmanovog Protokola</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #0A2463; color: #FFFFFF; }
+        .card { background-color: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.2); }
+        .highlight-blue { color: #3E92CC; }
+        .highlight-yellow { color: #FFF275; }
+        .highlight-red { color: #D8315B; }
+        .chart-container { position: relative; width: 100%; max-width: 800px; margin-left: auto; margin-right: auto; height: 300px; max-height: 50vh; }
+        @media (min-width: 768px) { .chart-container { height: 400px; } }
+    </style>
+</head>
+<body class="antialiased">
+
+    <main class="container mx-auto px-4 py-12 md:py-20">
+
+        <header class="text-center mb-16 md:mb-24">
+            <h1 class="text-4xl md:text-6xl font-black uppercase tracking-wider">
+                <span class="highlight-yellow">Diffie-Hellman</span> <br/> Protokol
+            </h1>
+            <p class="mt-4 text-lg md:text-xl max-w-3xl mx-auto text-gray-300">
+                Sveobuhvatno putovanje od revolucionarne ideje do temelja moderne internetske sigurnosti.
+            </p>
+        </header>
+
+        <!-- Section 1: The Problem -->
+        <section class="mb-16 md:mb-24">
+            <div class="card rounded-2xl p-6 md:p-10 text-center">
+                <h2 class="text-2xl md:text-3xl font-bold mb-4">Dilema Tajnog Rukovanja</h2>
+                <p class="text-lg md:text-xl text-gray-300 mb-6 max-w-2xl mx-auto">Kako dvije osobe mogu dogovoriti tajni ključ preko javnog kanala, poput interneta, a da ga prisluškivač ne otkrije? To je bio ključni problem koji je sputavao digitalnu privatnost.</p>
+                <div class="text-5xl md:text-7xl font-black highlight-red animate-pulse">?</div>
+            </div>
+        </section>
+
+        <!-- Section 2: Color Analogy -->
+        <section class="mb-16 md:mb-24">
+            <h2 class="text-3xl font-bold text-center mb-8">Revolucionarna Ideja: <span class="highlight-yellow">Miješanje Boja</span></h2>
+            <div class="card rounded-2xl p-6 md:p-10">
+                <div class="space-y-8">
+                    <div class="text-center">
+                        <p class="font-bold text-lg mb-2">1. JAVNI DOGOVOR</p>
+                        <div class="flex justify-center items-center space-x-4">
+                            <span>Alice</span>
+                            <div class="w-16 h-16 rounded-full bg-yellow-300 border-4 border-yellow-200" title="Javna boja"></div>
+                            <span>Bob</span>
+                        </div>
+                        <p class="text-sm text-gray-400 mt-2">Svi, uključujući prisluškivača, znaju za početnu javnu boju (žutu).</p>
+                    </div>
+
+                    <div class="flex justify-around text-center">
+                         <div>
+                            <p class="font-bold text-lg mb-2">2. PRIVATNE TAJNE</p>
+                            <div class="w-16 h-16 rounded-full bg-red-500 border-4 border-red-400 mx-auto" title="Alicina tajna"></div>
+                            <p class="text-sm text-gray-400 mt-2">Alice potajno bira crvenu.</p>
+                        </div>
+                        <div>
+                            <p class="font-bold text-lg mb-2">&nbsp;</p>
+                            <div class="w-16 h-16 rounded-full bg-blue-500 border-4 border-blue-400 mx-auto" title="Bobova tajna"></div>
+                            <p class="text-sm text-gray-400 mt-2">Bob potajno bira plavu.</p>
+                        </div>
+                    </div>
+
+                    <div class="text-center">
+                        <p class="font-bold text-lg mb-2">3. MIJEŠANJE I JAVNA RAZMJENA</p>
+                        <div class="flex justify-center items-center space-x-4">
+                            <div class="w-16 h-16 rounded-full bg-orange-500 border-4 border-orange-400" title="Alicina mješavina"></div>
+                            <span class="text-4xl font-thin text-gray-500">&harr;</span>
+                            <div class="w-16 h-16 rounded-full bg-green-500 border-4 border-green-400" title="Bobova mješavina"></div>
+                        </div>
+                        <p class="text-sm text-gray-400 mt-2">Nakon miješanja sa javnom bojom, javno razmjenjuju nove boje.</p>
+                    </div>
+
+                     <div class="text-center pt-4 border-t border-gray-700">
+                        <p class="font-bold text-lg mb-2">4. STVARANJE ZAJEDNIČKE TAJNE</p>
+                        <div class="flex justify-center items-center space-x-4">
+                            <div class="w-20 h-20 rounded-full bg-yellow-900 border-4 border-yellow-700" title="Zajednička tajna"></div>
+                        </div>
+                        <p class="text-sm text-gray-400 mt-2">Dodavanjem svoje privatne boje na primljenu mješavinu, oboje dobivaju istu tajnu boju (smeđu). Prisluškivač je ne može stvoriti!</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 3: The Math -->
+        <section class="mb-16 md:mb-24">
+            <h2 class="text-3xl font-bold text-center mb-8">Protokol u Praksi: <span class="highlight-yellow">Modularna Aritmetika</span></h2>
+            <div class="card rounded-2xl p-6 md:p-10">
+                <p class="text-center text-gray-300 mb-8">U stvarnosti, "miješanje boja" je matematička operacija zvana modularno potenciranje, koja je laka u jednom smjeru, ali izuzetno teška u suprotnom (problem diskretnog logaritma).</p>
+                <div class="space-y-6">
+                    <div class="text-center p-4 bg-black bg-opacity-20 rounded-lg">
+                        <p class="font-bold text-lg">JAVNI PARAMETRI: <span class="font-mono highlight-blue">p</span> (veliki prosti broj) i <span class="font-mono highlight-blue">g</span> (generator)</p>
+                    </div>
+                    <div class="grid md:grid-cols-3 gap-6 items-center">
+                        <div class="text-center space-y-2">
+                             <h3 class="font-bold text-xl highlight-red">ALICE</h3>
+                             <p class="text-sm">Bira tajnu <span class="font-mono">a</span></p>
+                             <p>Računa javni ključ</p>
+                             <p class="font-mono p-2 bg-black bg-opacity-20 rounded">A = g^a mod p</p>
+                        </div>
+                        <div class="text-center font-bold text-2xl md:text-4xl text-gray-500 py-4">
+                            <p class="mb-2">A &rarr;</p>
+                            <p>&larr; B</p>
+                        </div>
+                        <div class="text-center space-y-2">
+                             <h3 class="font-bold text-xl highlight-blue">BOB</h3>
+                             <p class="text-sm">Bira tajnu <span class="font-mono">b</span></p>
+                             <p>Računa javni ključ</p>
+                             <p class="font-mono p-2 bg-black bg-opacity-20 rounded">B = g^b mod p</p>
+                        </div>
+                    </div>
+                    <div class="text-center p-4 bg-green-500 bg-opacity-20 rounded-lg border border-green-400">
+                        <p class="font-bold text-lg">ZAJEDNIČKA TAJNA (s)</p>
+                        <div class="grid md:grid-cols-2 gap-4 mt-2">
+                             <p class="font-mono">Alice računa: s = B^a mod p</p>
+                             <p class="font-mono">Bob računa: s = A^b mod p</p>
+                        </div>
+                         <p class="mt-2 text-green-300 font-bold">Rezultati su identični!</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 4: MitM -->
+        <section class="mb-16 md:mb-24">
+             <h2 class="text-3xl font-bold text-center mb-8">Kritična Slabost: <span class="highlight-red">Čovjek u Sredini</span></h2>
+            <div class="card rounded-2xl p-6 md:p-10 border-red-500 border-2">
+                <p class="text-center text-gray-300 mb-8">Osnovni protokol nema autentifikaciju. Aktivni napadač (Eve) može se postaviti u sredinu, presresti komunikaciju i uspostaviti odvojene tajne s obje strane.</p>
+                <div class="grid grid-cols-3 gap-4 items-start">
+                    <div class="text-center border-2 border-dashed border-gray-600 p-4 rounded-lg h-full flex flex-col justify-between">
+                         <h3 class="font-bold text-xl highlight-red">ALICE</h3>
+                         <p class="font-mono text-sm">Šalje A</p>
+                         <p class="text-4xl">&darr;</p>
+                         <p class="font-mono text-sm text-red-400">Prima E</p>
+                         <p class="mt-4">Računa tajnu: <br> <span class="font-mono text-sm">s1 = E^a</span></p>
+                    </div>
+                     <div class="text-center p-4 h-full flex flex-col justify-center">
+                         <h3 class="font-bold text-xl highlight-yellow">EVE</h3>
+                         <div class="my-4 space-y-2">
+                             <p class="text-sm">Presreće A, šalje E</p>
+                              <p class="text-4xl text-gray-500">&harr;</p>
+                             <p class="text-sm">Presreće B, šalje E</p>
+                         </div>
+                         <p class="mt-4">Računa obje tajne: <br> <span class="font-mono text-sm">s1=A^e, s2=B^e</span></p>
+                    </div>
+                    <div class="text-center border-2 border-dashed border-gray-600 p-4 rounded-lg h-full flex flex-col justify-between">
+                         <h3 class="font-bold text-xl highlight-blue">BOB</h3>
+                         <p class="font-mono text-sm">Šalje B</p>
+                         <p class="text-4xl">&darr;</p>
+                         <p class="font-mono text-sm text-red-400">Prima E</p>
+                         <p class="mt-4">Računa tajnu: <br> <span class="font-mono text-sm">s2 = E^b</span></p>
+                    </div>
+                </div>
+                 <p class="text-center mt-8 font-bold text-red-400 text-lg">Rezultat: Eve može čitati i mijenjati svu komunikaciju.</p>
+            </div>
+        </section>
+
+        <!-- Section 5: The Solution -->
+        <section class="mb-16 md:mb-24">
+            <h2 class="text-3xl font-bold text-center mb-8">Rješenje: <span class="highlight-yellow">Digitalni Potpisi</span></h2>
+            <div class="card rounded-2xl p-6 md:p-10">
+                <p class="text-center text-gray-300 mb-8">Autentifikacija se postiže digitalnim potpisima. Svaka strana koristi svoj dugoročni privatni ključ da "potpiše" svoj privremeni DH javni ključ, dokazujući svoj identitet.</p>
+                <div class="flex flex-col md:flex-row gap-8">
+                    <div class="flex-1 text-center p-4 bg-black bg-opacity-20 rounded-lg">
+                        <p class="font-bold text-lg mb-4">1. Bob Potpisuje</p>
+                        <p class="font-mono highlight-blue">Javni ključ B</p>
+                        <p class="text-2xl my-2">&darr;</p>
+                        <p class="font-bold">Potpis s <span class="highlight-red">Bobovim Privatnim Ključem</span></p>
+                        <span class="text-4xl my-2 inline-block">&#128272;</span>
+                        <p class="font-mono highlight-yellow">Digitalni Potpis</p>
+                    </div>
+                     <div class="flex-1 text-center p-4 bg-black bg-opacity-20 rounded-lg">
+                        <p class="font-bold text-lg mb-4">2. Alice Provjerava</p>
+                        <p class="font-mono highlight-blue">Javni ključ B</p>
+                        <p class="font-mono highlight-yellow">Digitalni Potpis</p>
+                        <p class="text-2xl my-2">&darr;</p>
+                        <p class="font-bold">Provjera s <span class="highlight-green-400">Bobovim Javnim Ključem</span></p>
+                        <span class="text-4xl my-2 inline-block text-green-400">&#128275;</span>
+                        <p class="font-bold text-green-400">Potpis je Valjan!</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 6: Modern DH -->
+        <section class="mb-16 md:mb-24">
+            <h2 class="text-3xl font-bold text-center mb-8">Moderna Era: <span class="highlight-yellow">Učinkovitost i Sigurnost</span></h2>
+            <div class="card rounded-2xl p-6 md:p-10">
+                <p class="text-center text-gray-300 mb-8">Danas je standard **Efemerni Diffie-Hellman na Eliptičkim Krivuljama (ECDHE)**. Pruža istu razinu sigurnosti kao klasični DH, ali s dramatično manjim i bržim ključevima, što je idealno za mobilne uređaje. Također pruža **Savršenu Tajnost Unaprijed (PFS)**, što znači da kompromitiranje dugoročnog ključa ne ugrožava prošle sesije.</p>
+                <div class="chart-container">
+                    <canvas id="keySizeChart"></canvas>
+                </div>
+                 <p class="text-center text-sm text-gray-400 mt-4">Veličina ključa u bitima za ekvivalentnu 128-bitnu sigurnost.</p>
+            </div>
+        </section>
+        
+        <!-- Section 7: Quantum Threat -->
+        <section>
+            <div class="card rounded-2xl p-6 md:p-10 text-center border-yellow-400">
+                <h2 class="text-2xl md:text-3xl font-bold mb-4">Prijetnja iz Budućnosti: <span class="highlight-yellow">Kvantna Računala</span></h2>
+                <p class="text-lg md:text-xl text-gray-300 mb-6 max-w-2xl mx-auto">Shorov algoritam na kvantnom računalu moći će razbiti DH i ECDH. Zato kriptografi već razvijaju **post-kvantnu kriptografiju** kako bi osigurali našu digitalnu budućnost.</p>
+            </div>
+        </section>
+
+    </main>
+
+<script>
+    const ctx = document.getElementById('keySizeChart');
+    if (ctx) {
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: [
+                    ['Klasični DH', '(DHE)'], 
+                    ['Eliptička Krivulja DH', '(ECDHE)']
+                ],
+                datasets: [{
+                    label: 'Veličina ključa (bitovi)',
+                    data: [3072, 256],
+                    backgroundColor: [
+                        'rgba(216, 49, 91, 0.7)',
+                        'rgba(62, 146, 204, 0.7)',
+                    ],
+                    borderColor: [
+                        '#D8315B',
+                        '#3E92CC',
+                    ],
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        grid: {
+                            color: 'rgba(255, 255, 255, 0.1)'
+                        },
+                        ticks: {
+                            color: '#FFFFFF'
+                        }
+                    },
+                    y: {
+                         grid: {
+                            display: false
+                        },
+                        ticks: {
+                            color: '#FFFFFF',
+                            font: {
+                                size: 14
+                            }
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        callbacks: {
+                            title: function(tooltipItems) {
+                                const item = tooltipItems[0];
+                                let label = item.chart.data.labels[item.dataIndex];
+                                return Array.isArray(label) ? label.join(' ') : label;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+</script>
+
+</body>
+</html>
