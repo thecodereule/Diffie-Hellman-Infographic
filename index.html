@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interaktivni Vodič: Diffie-Hellmanov Protokol</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #fdfcfb; color: #333; }
+        .bg-warm-neutral { background-color: #f5f3f1; }
+        .bg-accent { background-color: #4a90e2; }
+        .text-accent { color: #4a90e2; }
+        .border-accent { border-color: #4a90e2; }
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 500;
+            transition: all 0.2s ease-in-out;
+            cursor: pointer;
+            border: 1px solid transparent;
+        }
+        .btn-primary { background-color: #4a90e2; color: white; }
+        .btn-primary:hover { background-color: #357abd; }
+        .btn-secondary { background-color: #e2e8f0; color: #4a5568; }
+        .btn-secondary:hover { background-color: #cbd5e0; }
+        .card { background-color: white; border-radius: 0.75rem; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -2px rgba(0,0,0,0.1); padding: 1.5rem; }
+        .step-bubble {
+            width: 3rem; height: 3rem; border-radius: 9999px; display: flex; align-items: center; justify-content: center; font-weight: 700; color: white;
+            transition: all 0.3s ease;
+        }
+        .connector { height: 2px; flex-grow: 1; transition: all 0.3s ease; }
+        .section-title { font-size: 2.25rem; line-height: 2.5rem; font-weight: 700; text-align: center; }
+        .section-subtitle { font-size: 1.125rem; line-height: 1.75rem; text-align: center; color: #718096; max-width: 48rem; margin: 1rem auto 3rem; }
+        .actor-box { border: 2px dashed #cbd5e0; padding: 1rem; border-radius: 0.5rem; text-align: center; width: 100%; transition: all 0.3s ease; }
+        .key-box { font-family: monospace; padding: 0.25rem 0.5rem; border-radius: 0.25rem; background-color: #e2e8f0; display: inline-block; word-break: break-all; }
+        .flow-arrow {
+            font-size: 2rem;
+            color: #9ca3af;
+            margin: 0 1rem;
+            transform: scale(0);
+            transition: transform 0.5s ease-in-out;
+        }
+        .chart-container { position: relative; width: 100%; max-width: 800px; margin-left: auto; margin-right: auto; height: 350px; max-height: 40vh; }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header class="bg-warm-neutral sticky top-0 z-50 shadow-sm">
+        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <h1 class="text-xl font-bold text-accent">Diffie-Hellman Vodič</h1>
+            <div class="hidden md:flex space-x-6">
+                <a href="#problem" class="text-gray-600 hover:text-accent transition">Problem</a>
+                <a href="#protocol" class="text-gray-600 hover:text-accent transition">Protokol</a>
+                <a href="#attack" class="text-gray-600 hover:text-accent transition">Napad</a>
+                <a href="#solution" class="text-gray-600 hover:text-accent transition">Rješenje</a>
+                <a href="#modern" class="text-gray-600 hover:text-accent transition">Moderne Varijante</a>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container mx-auto px-6 py-12">
+        
+        <!-- SECTION 1: The Problem -->
+        <section id="problem" class="text-center py-16">
+            <h2 class="section-title">Problem Tajne Komunikacije</h2>
+            <p class="section-subtitle">
+                Prije nego što je postojao Diffie-Hellman, sigurna komunikacija preko nesigurnog kanala poput interneta bila je gotovo nemoguća. Glavni izazov bio je: kako se dvije osobe, koje se nikada nisu srele, mogu dogovoriti o tajnom ključu za šifriranje, a da taj ključ ne presretne prisluškivač?
+            </p>
+            <div class="card max-w-4xl mx-auto">
+                <h3 class="text-xl font-semibold mb-4">Analogija s Miješanjem Boja</h3>
+                <p class="text-gray-600 mb-6">Zamislite da Alice i Bob žele stvoriti tajnu boju, ali mogu komunicirati samo javno, gdje ih zla Eve može vidjeti. Diffie-Hellman protokol rješava ovaj problem na genijalan način.</p>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-center text-center">
+                    <div>
+                        <h4 class="font-semibold">Alice</h4>
+                        <div id="color-alice-secret" class="w-24 h-24 mx-auto my-2 rounded-full border-4" style="background-color: #ff6384; border-color: #ff6384;"></div>
+                        <p class="text-sm text-gray-500">Privatna crvena</p>
+                    </div>
+                    <div>
+                        <h4 class="font-semibold">Javna Boja</h4>
+                        <div id="color-public" class="w-24 h-24 mx-auto my-2 rounded-full border-4" style="background-color: #ffce56; border-color: #ffce56;"></div>
+                         <p class="text-sm text-gray-500">Javna žuta</p>
+                    </div>
+                    <div>
+                        <h4 class="font-semibold">Bob</h4>
+                        <div id="color-bob-secret" class="w-24 h-24 mx-auto my-2 rounded-full border-4" style="background-color: #36a2eb; border-color: #36a2eb;"></div>
+                         <p class="text-sm text-gray-500">Privatna plava</p>
+                    </div>
+                </div>
+                <div class="mt-6">
+                    <button id="mix-colors-btn" class="btn btn-primary">1. Pomiješaj i Razmijeni</button>
+                </div>
+                <div id="color-exchange-step" class="mt-8 opacity-0 transition-opacity duration-500">
+                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
+                        <div>
+                            <p class="font-semibold">Alice šalje Bobu:</p>
+                            <div id="color-alice-public" class="w-24 h-24 mx-auto my-2 rounded-full border-4" style="background-color: #ffce56; border-color: #ffce56;"></div>
+                            <p class="text-sm text-gray-500">Narančasta</p>
+                        </div>
+                        <div class="text-2xl font-bold text-gray-400">&harr;</div>
+                        <div>
+                            <p class="font-semibold">Bob šalje Alice:</p>
+                            <div id="color-bob-public" class="w-24 h-24 mx-auto my-2 rounded-full border-4" style="background-color: #ffce56; border-color: #ffce56;"></div>
+                            <p class="text-sm text-gray-500">Zelena</p>
+                        </div>
+                    </div>
+                </div>
+                <div id="final-secret-step" class="mt-8 opacity-0 transition-opacity duration-500">
+                     <button id="create-secret-btn" class="btn btn-primary">2. Stvori Zajedničku Tajnu</button>
+                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-center mt-6">
+                         <div>
+                             <h4 class="font-semibold">Aliceina Tajna</h4>
+                             <div id="color-alice-final" class="w-24 h-24 mx-auto my-2 rounded-full border-4" style="background-color: #ff9f40; border-color: #ff9f40;"></div>
+                         </div>
+                         <div class="text-2xl font-bold text-green-500">&#10004;</div>
+                          <div>
+                             <h4 class="font-semibold">Bobova Tajna</h4>
+                             <div id="color-bob-final" class="w-24 h-24 mx-auto my-2 rounded-full border-4" style="background-color: #4bc0c0; border-color: #4bc0c0;"></div>
+                         </div>
+                     </div>
+                     <p class="mt-4 font-semibold text-lg">Eve ne može dobiti smeđu boju jer ne zna privatne boje!</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 2: The Protocol -->
+        <section id="protocol" class="py-16">
+            <h2 class="section-title">Kako Funkcionira Diffie-Hellman?</h2>
+            <p class="section-subtitle">
+                Protokol koristi matematički trik zvan modularno potenciranje. Računanje u jednom smjeru je lako, ali u suprotnom (pronalaženje "tajnog" eksponenta) je izuzetno teško. To se zove problem diskretnog logaritma. Ova simulacija pokazuje kako Alice i Bob koriste tu matematiku da bi stvorili zajedničku tajnu.
+            </p>
+            <div class="card max-w-6xl mx-auto">
+                <div class="text-center mb-8">
+                    <button id="run-dh-sim-btn" class="btn btn-primary">Pokreni Simulaciju</button>
+                </div>
+                
+                <div id="dh-sim-container">
+                    <!-- Step 1: Public Parameters -->
+                    <div class="flex items-center justify-center mb-4">
+                        <div id="dh-step-1-bubble" class="step-bubble bg-gray-400">1</div>
+                    </div>
+                    <div id="dh-step-1-content" class="text-center mb-8 opacity-0 transition-opacity duration-500">
+                        <h3 class="font-semibold text-lg">1. Javni Dogovor</h3>
+                        <p class="text-gray-600">Alice i Bob se javno dogovore o dva broja: velikom prostom broju `p` i generatoru `g`.</p>
+                        <div class="flex justify-center space-x-4 mt-2">
+                            <p>p = <span id="dh-p" class="key-box">?</span></p>
+                            <p>g = <span id="dh-g" class="key-box">?</span></p>
+                        </div>
+                    </div>
+
+                    <!-- Step 2: Private/Public Keys -->
+                    <div class="flex items-center justify-center mb-4">
+                        <div id="dh-step-2-bubble" class="step-bubble bg-gray-400">2</div>
+                    </div>
+                    <div id="dh-step-2-content" class="grid md:grid-cols-2 gap-6 mb-8 opacity-0 transition-opacity duration-500">
+                        <div class="actor-box" id="dh-alice-box">
+                            <h4 class="font-bold text-lg">Alice</h4>
+                            <p>Privatni ključ (a): <span id="dh-a-priv" class="key-box">?</span></p>
+                            <p class="mt-2">Javni ključ (A = g^a mod p): <span id="dh-a-pub" class="key-box">?</span></p>
+                        </div>
+                        <div class="actor-box" id="dh-bob-box">
+                            <h4 class="font-bold text-lg">Bob</h4>
+                            <p>Privatni ključ (b): <span id="dh-b-priv" class="key-box">?</span></p>
+                            <p class="mt-2">Javni ključ (B = g^b mod p): <span id="dh-b-pub" class="key-box">?</span></p>
+                        </div>
+                    </div>
+                    
+                    <!-- Step 3: Exchange -->
+                     <div class="flex items-center justify-center mb-4">
+                        <div id="dh-step-3-bubble" class="step-bubble bg-gray-400">3</div>
+                    </div>
+                    <div id="dh-step-3-content" class="text-center mb-8 opacity-0 transition-opacity duration-500">
+                        <h3 class="font-semibold text-lg">3. Razmjena Javnih Ključeva</h3>
+                        <div class="flex justify-center items-center mt-2">
+                             <span class="key-box" id="dh-exchange-A">A</span>
+                             <span id="dh-arrow-1" class="flow-arrow">&rarr;</span>
+                             <span class="text-2xl mx-4"> &#128274; </span>
+                             <span id="dh-arrow-2" class="flow-arrow">&larr;</span>
+                             <span class="key-box" id="dh-exchange-B">B</span>
+                        </div>
+                    </div>
+
+                    <!-- Step 4: Shared Secret -->
+                     <div class="flex items-center justify-center mb-4">
+                        <div id="dh-step-4-bubble" class="step-bubble bg-gray-400">4</div>
+                    </div>
+                    <div id="dh-step-4-content" class="grid md:grid-cols-2 gap-6 opacity-0 transition-opacity duration-500">
+                         <div class="actor-box" id="dh-alice-secret-box">
+                            <h4 class="font-bold text-lg">Alice računa</h4>
+                            <p>Tajna (s = B^a mod p): <span id="dh-s-alice" class="key-box">?</span></p>
+                        </div>
+                        <div class="actor-box" id="dh-bob-secret-box">
+                            <h4 class="font-bold text-lg">Bob računa</h4>
+                            <p>Tajna (s = A^b mod p): <span id="dh-s-bob" class="key-box">?</span></p>
+                        </div>
+                    </div>
+                    
+                    <div id="dh-sim-result" class="text-center mt-8 text-xl font-bold opacity-0 transition-opacity duration-500"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 3: The Attack -->
+        <section id="attack" class="py-16 bg-warm-neutral">
+            <h2 class="section-title">Napad "Čovjek u Sredini" (MitM)</h2>
+            <p class="section-subtitle">
+                Osnovni Diffie-Hellman protokol je genijalan, ali ima jednu veliku slabost: nedostatak autentifikacije. Alice ne može biti sigurna da javni ključ koji je primila zaista pripada Bobu. Aktivni napadač, Eve, može iskoristiti ovu slabost da se postavi između njih, presretne komunikaciju i uspostavi odvojene tajne s oboje.
+            </p>
+            <div class="card max-w-6xl mx-auto">
+                <div class="text-center mb-8">
+                    <button id="run-mitm-sim-btn" class="btn btn-primary">Pokreni Simulaciju Napada</button>
+                </div>
+                
+                <div class="grid grid-cols-3 gap-4 items-start">
+                    <!-- Alice -->
+                    <div id="mitm-alice-box" class="actor-box flex flex-col items-center p-4 h-full">
+                        <h4 class="font-bold text-xl">Alice</h4>
+                        <p class="text-sm mt-2">Privatni ključ (a): <span id="mitm-a-priv" class="key-box">?</span></p>
+                        <p class="text-sm mt-2">Javni ključ (A): <span id="mitm-a-pub" class="key-box">?</span></p>
+                        <div class="mt-auto pt-4">
+                            <p class="text-sm font-semibold">Izračunata tajna:</p>
+                            <span id="mitm-s-alice" class="key-box text-lg">?</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Eve -->
+                    <div class="flex flex-col items-center h-full">
+                        <div id="mitm-eve-box" class="actor-box w-full p-4 border-red-500 border-2">
+                             <h4 class="font-bold text-xl text-red-600">Eve (Napadač)</h4>
+                             <p class="text-sm mt-2">Njen privatni ključ (e): <span id="mitm-e-priv" class="key-box">?</span></p>
+                             <p class="text-sm mt-2">Njen javni ključ (E): <span id="mitm-e-pub" class="key-box">?</span></p>
+                        </div>
+                        <div id="mitm-flow" class="w-full text-center mt-4 opacity-0 transition-opacity duration-500">
+                             <p id="mitm-flow-1" class="text-gray-600 mb-2 transition-all duration-300 scale-0">Alice šalje A &rarr;</p>
+                             <p id="mitm-flow-2" class="text-red-600 mb-2 transition-all duration-300 scale-0">Eve presreće A i šalje E &rarr;</p>
+                             <p id="mitm-flow-3" class="text-gray-600 mb-8 transition-all duration-300 scale-0">&larr; Bob šalje B</p>
+                             <p id="mitm-flow-4" class="text-red-600 mb-2 transition-all duration-300 scale-0">&larr; Eve presreće B i šalje E</p>
+                        </div>
+                         <div id="mitm-eve-secrets" class="actor-box w-full mt-auto p-4 border-red-500 border-2 opacity-0 transition-opacity duration-500">
+                              <p class="text-sm font-semibold">Evine tajne:</p>
+                              <p class="text-sm mt-2">S Alice: <span id="mitm-s-eve-a" class="key-box">?</span></p>
+                              <p class="text-sm mt-2">S Bobom: <span id="mitm-s-eve-b" class="key-box">?</span></p>
+                        </div>
+                    </div>
+
+                    <!-- Bob -->
+                     <div id="mitm-bob-box" class="actor-box flex flex-col items-center p-4 h-full">
+                        <h4 class="font-bold text-xl">Bob</h4>
+                        <p class="text-sm mt-2">Privatni ključ (b): <span id="mitm-b-priv" class="key-box">?</span></p>
+                        <p class="text-sm mt-2">Javni ključ (B): <span id="mitm-b-pub" class="key-box">?</span></p>
+                        <div class="mt-auto pt-4">
+                            <p class="text-sm font-semibold">Izračunata tajna:</p>
+                            <span id="mitm-s-bob" class="key-box text-lg">?</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="mitm-sim-result" class="text-center mt-8 text-xl font-bold opacity-0 transition-opacity duration-500"></div>
+            </div>
+        </section>
+
+        <!-- SECTION 4: The Solution -->
+        <section id="solution" class="py-16">
+            <h2 class="section-title">Rješenje: Autentifikacija je Ključ</h2>
+            <p class="section-subtitle">
+                Problem "čovjeka u sredini" rješava se autentifikacijom - procesom provjere identiteta. U modernoj kriptografiji, to se postiže **digitalnim potpisima** i **certifikatima**. Bob može svojim dugoročnim privatnim ključem "potpisati" svoj privremeni Diffie-Hellman javni ključ. Alice zatim može provjeriti taj potpis koristeći Bobov javni ključ (koji dobiva iz pouzdanog certifikata).
+            </p>
+            <div class="card max-w-4xl mx-auto">
+                 <div class="grid md:grid-cols-2 gap-8 items-center">
+                    <div>
+                        <h3 class="font-semibold text-lg mb-2">1. Bob potpisuje svoj javni ključ</h3>
+                        <p class="text-gray-600 text-sm mb-4">Bob koristi svoj dugoročni privatni ključ (SK_B) da stvori digitalni potpis na svom DH javnom ključu (B).</p>
+                        <div class="p-4 bg-gray-100 rounded-lg">
+                            <p class="font-mono">Poruka: <span class="key-box bg-blue-100">Javni ključ B</span></p>
+                            <p class="text-2xl text-center my-2">&darr;</p>
+                            <div class="flex items-center">
+                                <p class="font-mono">Potpis s <span class="key-box bg-red-100">SK_B</span></p>
+                                <span class="text-2xl mx-2">&#128272;</span>
+                            </div>
+                            <p class="text-2xl text-center my-2">&darr;</p>
+                            <p class="font-mono">Digitalni Potpis: <span class="key-box bg-green-100">a3f...1b9</span></p>
+                        </div>
+                    </div>
+                     <div>
+                        <h3 class="font-semibold text-lg mb-2">2. Alice provjerava potpis</h3>
+                        <p class="text-gray-600 text-sm mb-4">Alice prima Bobov DH javni ključ (B) i njegov potpis. Koristi Bobov javni ključ za provjeru (PK_B) da potvrdi autentičnost.</p>
+                        <div class="p-4 bg-gray-100 rounded-lg">
+                             <p class="font-mono">Primljeno: <span class="key-box bg-blue-100">Javni ključ B</span> + <span class="key-box bg-green-100">a3f...1b9</span></p>
+                            <p class="text-2xl text-center my-2">&darr;</p>
+                            <div class="flex items-center">
+                                <p class="font-mono">Provjera s <span class="key-box bg-green-100">PK_B</span></p>
+                                <span class="text-2xl mx-2">&#128273;</span>
+                            </div>
+                            <p class="text-2xl text-center my-2">&darr;</p>
+                            <p class="font-bold text-center text-green-600">✔️ Potpis je valjan!</p>
+                        </div>
+                    </div>
+                </div>
+                <p class="text-center mt-8 font-semibold text-red-600">Eve ne može lažirati Bobov potpis jer nema njegov privatni ključ. Napad ne uspijeva!</p>
+            </div>
+        </section>
+
+        <!-- SECTION 5: Modern Variants -->
+        <section id="modern" class="py-16 bg-warm-neutral">
+            <h2 class="section-title">Moderne Varijante i Primjena</h2>
+            <p class="section-subtitle">
+                Diffie-Hellman protokol je evoluirao. Danas se najčešće koristi **Eliptička Krivulja Diffie-Hellman (ECDHE)**. Ona pruža istu razinu sigurnosti s puno manjim ključevima, što je čini bržom i učinkovitijom, posebno za mobilne uređaje. U kombinaciji s digitalnim potpisima, ECDHE osigurava **savršenu tajnost unaprijed (PFS)**, što znači da čak i ako napadač ukrade dugoročni ključ poslužitelja, ne može dešifrirati prošle komunikacije.
+            </p>
+             <div class="card max-w-4xl mx-auto">
+                <h3 class="text-xl font-semibold mb-6 text-center">Usporedba Veličine Ključeva za Ekvivalentnu Sigurnost</h3>
+                <div class="chart-container">
+                    <canvas id="keySizeChart"></canvas>
+                </div>
+                <p class="text-center text-sm text-gray-500 mt-4">ECDH postiže istu sigurnost s dramatično manjim, bržim ključevima.</p>
+            </div>
+        </section>
+
+    </main>
+    
+    <footer class="bg-gray-800 text-white text-center p-4">
+        <p>Interaktivni vodič kreiran za edukacijske svrhe.</p>
+    </footer>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+
+    // --- Section 1: Color Mixing Analogy ---
+    const mixBtn = document.getElementById('mix-colors-btn');
+    const secretBtn = document.getElementById('create-secret-btn');
+    const exchangeStep = document.getElementById('color-exchange-step');
+    const finalStep = document.getElementById('final-secret-step');
+    
+    const alicePublic = document.getElementById('color-alice-public');
+    const bobPublic = document.getElementById('color-bob-public');
+    const aliceFinal = document.getElementById('color-alice-final');
+    const bobFinal = document.getElementById('color-bob-final');
+
+    mixBtn.addEventListener('click', () => {
+        // Alice mixes Red + Yellow -> Orange
+        alicePublic.style.backgroundColor = '#ff9f40';
+        alicePublic.style.borderColor = '#ff9f40';
+        // Bob mixes Blue + Yellow -> Green
+        bobPublic.style.backgroundColor = '#4bc0c0';
+        bobPublic.style.borderColor = '#4bc0c0';
+        
+        exchangeStep.style.opacity = '1';
+        finalStep.style.opacity = '1';
+        mixBtn.disabled = true;
+    });
+
+    secretBtn.addEventListener('click', () => {
+        // Alice mixes Orange + Red, Bob mixes Green + Blue. Both get Brown.
+        const finalColor = '#a56a42'; // Brown
+        aliceFinal.style.backgroundColor = finalColor;
+        aliceFinal.style.borderColor = finalColor;
+        bobFinal.style.backgroundColor = finalColor;
+        bobFinal.style.borderColor = finalColor;
+        secretBtn.disabled = true;
+    });
+
+    // --- Section 2: DH Simulation ---
+    const runDhSimBtn = document.getElementById('run-dh-sim-btn');
+    runDhSimBtn.addEventListener('click', runDhSimulation);
+
+    function runDhSimulation() {
+        // Reset state
+        const elements = ['dh-p', 'dh-g', 'dh-a-priv', 'dh-a-pub', 'dh-b-priv', 'dh-b-pub', 'dh-exchange-A', 'dh-exchange-B', 'dh-s-alice', 'dh-s-bob'];
+        elements.forEach(id => document.getElementById(id).textContent = '?');
+        
+        const steps = ['dh-step-1', 'dh-step-2', 'dh-step-3', 'dh-step-4'];
+        steps.forEach(id => {
+            document.getElementById(`${id}-content`).style.opacity = '0';
+            document.getElementById(`${id}-bubble`).classList.remove('bg-accent');
+            document.getElementById(`${id}-bubble`).classList.add('bg-gray-400');
+        });
+        
+        document.getElementById('dh-sim-result').style.opacity = '0';
+        document.getElementById('dh-sim-result').textContent = '';
+        ['dh-arrow-1', 'dh-arrow-2'].forEach(id => document.getElementById(id).style.transform = 'scale(0)');
+        
+        // Simulation parameters
+        const p = 23;
+        const g = 5;
+        const a = Math.floor(Math.random() * 10) + 2; // random 2-11
+        const b = Math.floor(Math.random() * 10) + 12; // random 12-21
+
+        let step = 0;
+        
+        function nextStep() {
+            step++;
+            switch(step) {
+                case 1: // Public params
+                    document.getElementById('dh-step-1-bubble').classList.replace('bg-gray-400', 'bg-accent');
+                    document.getElementById('dh-step-1-content').style.opacity = '1';
+                    document.getElementById('dh-p').textContent = p;
+                    document.getElementById('dh-g').textContent = g;
+                    break;
+                case 2: // Private/Public keys
+                    document.getElementById('dh-step-2-bubble').classList.replace('bg-gray-400', 'bg-accent');
+                    document.getElementById('dh-step-2-content').style.opacity = '1';
+                    
+                    const A = Math.pow(g, a) % p;
+                    const B = Math.pow(g, b) % p;
+                    
+                    document.getElementById('dh-a-priv').textContent = a;
+                    document.getElementById('dh-a-pub').textContent = A;
+                    document.getElementById('dh-b-priv').textContent = b;
+                    document.getElementById('dh-b-pub').textContent = B;
+                    break;
+                case 3: // Exchange
+                    document.getElementById('dh-step-3-bubble').classList.replace('bg-gray-400', 'bg-accent');
+                    document.getElementById('dh-step-3-content').style.opacity = '1';
+                    document.getElementById('dh-exchange-A').textContent = document.getElementById('dh-a-pub').textContent;
+                    document.getElementById('dh-exchange-B').textContent = document.getElementById('dh-b-pub').textContent;
+                    document.getElementById('dh-arrow-1').style.transform = 'scale(1)';
+                    document.getElementById('dh-arrow-2').style.transform = 'scale(1)';
+                    break;
+                case 4: // Shared secret
+                    document.getElementById('dh-step-4-bubble').classList.replace('bg-gray-400', 'bg-accent');
+                    document.getElementById('dh-step-4-content').style.opacity = '1';
+                    const sA = Math.pow(parseInt(document.getElementById('dh-b-pub').textContent), a) % p;
+                    const sB = Math.pow(parseInt(document.getElementById('dh-a-pub').textContent), b) % p;
+                    document.getElementById('dh-s-alice').textContent = sA;
+                    document.getElementById('dh-s-bob').textContent = sB;
+                    
+                    // Final result
+                    const resultEl = document.getElementById('dh-sim-result');
+                    if (sA === sB) {
+                        resultEl.textContent = "✔️ USPJEH: Alice i Bob su uspješno uspostavili zajedničku tajnu!";
+                        resultEl.className = "text-center mt-8 text-xl font-bold text-green-600 opacity-0 transition-opacity duration-500";
+                    } else {
+                        resultEl.textContent = "❌ NEUSPJEH: Tajne se ne podudaraju.";
+                        resultEl.className = "text-center mt-8 text-xl font-bold text-red-600 opacity-0 transition-opacity duration-500";
+                    }
+                     setTimeout(() => resultEl.style.opacity = '1', 100);
+                     runDhSimBtn.disabled = false;
+                     break;
+            }
+             if (step < 4) {
+                setTimeout(nextStep, 1500);
+            }
+        }
+        
+        runDhSimBtn.disabled = true;
+        nextStep();
+    }
+    
+    // --- Section 3: MitM Simulation ---
+    const runMitmSimBtn = document.getElementById('run-mitm-sim-btn');
+    runMitmSimBtn.addEventListener('click', runMitmSimulation);
+    
+    function runMitmSimulation() {
+        // Reset
+        ['mitm-a-priv', 'mitm-a-pub', 'mitm-s-alice', 'mitm-b-priv', 'mitm-b-pub', 'mitm-s-bob', 'mitm-e-priv', 'mitm-e-pub', 'mitm-s-eve-a', 'mitm-s-eve-b'].forEach(id => {
+            document.getElementById(id).textContent = '?';
+        });
+        ['mitm-flow', 'mitm-eve-secrets', 'mitm-sim-result'].forEach(id => document.getElementById(id).style.opacity = '0');
+        for (let i = 1; i <= 4; i++) {
+            document.getElementById(`mitm-flow-${i}`).style.transform = 'scale(0)';
+            document.getElementById(`mitm-flow-${i}`).style.opacity = '0';
+        }
+        document.getElementById('mitm-sim-result').textContent = '';
+
+        // Params
+        const p = 23;
+        const g = 5;
+        const a = 4;
+        const b = 3;
+        const e = 6; // Eve's secret
+
+        const A = Math.pow(g, a) % p; // Alice's public key = 4
+        const B = Math.pow(g, b) % p; // Bob's public key = 10
+        const E = Math.pow(g, e) % p; // Eve's public key = 8
+
+        document.getElementById('mitm-a-priv').textContent = a;
+        document.getElementById('mitm-a-pub').textContent = A;
+        document.getElementById('mitm-b-priv').textContent = b;
+        document.getElementById('mitm-b-pub').textContent = B;
+        document.getElementById('mitm-e-priv').textContent = e;
+        document.getElementById('mitm-e-pub').textContent = E;
+        
+        let mitmStep = 0;
+        function nextMitmStep() {
+            mitmStep++;
+            switch(mitmStep) {
+                case 1:
+                    document.getElementById('mitm-flow').style.opacity = '1';
+                    document.getElementById(`mitm-flow-1`).style.transform = 'scale(1)';
+                    document.getElementById(`mitm-flow-1`).style.opacity = '1';
+                    break;
+                case 2:
+                    document.getElementById(`mitm-flow-2`).style.transform = 'scale(1)';
+                     document.getElementById(`mitm-flow-2`).style.opacity = '1';
+                    break;
+                case 3:
+                    document.getElementById(`mitm-flow-3`).style.transform = 'scale(1)';
+                     document.getElementById(`mitm-flow-3`).style.opacity = '1';
+                    break;
+                case 4:
+                    document.getElementById(`mitm-flow-4`).style.transform = 'scale(1)';
+                     document.getElementById(`mitm-flow-4`).style.opacity = '1';
+                    break;
+                case 5:
+                    // Secrets are computed
+                    const s_alice = Math.pow(E, a) % p; // Alice computes secret with Eve's key
+                    const s_bob = Math.pow(E, b) % p; // Bob computes secret with Eve's key
+                    document.getElementById('mitm-s-alice').textContent = s_alice;
+                    document.getElementById('mitm-s-bob').textContent = s_bob;
+                    
+                    const s_eve_a = Math.pow(A, e) % p; // Eve's secret with Alice
+                    const s_eve_b = Math.pow(B, e) % p; // Eve's secret with Bob
+                    
+                    document.getElementById('mitm-eve-secrets').style.opacity = '1';
+                    document.getElementById('mitm-s-eve-a').textContent = s_eve_a;
+                    document.getElementById('mitm-s-eve-b').textContent = s_eve_b;
+                    
+                    // Final result
+                    const resultEl = document.getElementById('mitm-sim-result');
+                    if (s_alice !== s_bob && s_alice === s_eve_a && s_bob === s_eve_b) {
+                        resultEl.innerHTML = `❌ NEUSPJEH KOMUNIKACIJE: Alice i Bob imaju različite tajne!<br>✔️ USPJEH NAPADA: Eve kontrolira oba kanala.`;
+                        resultEl.className = "text-center mt-8 text-xl font-bold text-red-600 opacity-0 transition-opacity duration-500";
+                    } else {
+                        resultEl.textContent = "Greška u simulaciji.";
+                         resultEl.className = "text-center mt-8 text-xl font-bold text-gray-600 opacity-0 transition-opacity duration-500";
+                    }
+                    setTimeout(() => resultEl.style.opacity = '1', 100);
+                    runMitmSimBtn.disabled = false;
+                    break;
+            }
+             if (mitmStep < 5) {
+                setTimeout(nextMitmStep, 1200);
+            }
+        }
+        runMitmSimBtn.disabled = true;
+        nextMitmStep();
+    }
+    
+    // --- Section 5: Key Size Chart ---
+    const ctx = document.getElementById('keySizeChart').getContext('2d');
+    const keySizeChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['Simetrični Ključ (AES)', 'Eliptička Krivulja DH (ECDH)', 'Klasični DH (DHE)'],
+            datasets: [{
+                label: 'Veličina ključa u bitima (za ekvivalentnu sigurnost)',
+                data: [128, 256, 3072],
+                backgroundColor: [
+                    'rgba(75, 192, 192, 0.6)',
+                    'rgba(255, 206, 86, 0.6)',
+                    'rgba(255, 99, 132, 0.6)',
+                ],
+                borderColor: [
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(255, 206, 86, 1)',
+                    'rgba(255, 99, 132, 1)',
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                x: {
+                    beginAtZero: true,
+                    type: 'logarithmic',
+                    title: {
+                        display: true,
+                        text: 'Veličina u bitima (logaritamska skela)'
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            let label = context.dataset.label || '';
+                            if (label) {
+                                label += ': ';
+                            }
+                            if (context.parsed.x !== null) {
+                                label += context.parsed.x + ' bita';
+                            }
+                            return label;
+                        }
+                    }
+                }
+            }
+        }
+    });
+    
+    // Smooth scrolling for nav links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            document.querySelector(this.getAttribute('href')).scrollIntoView({
+                behavior: 'smooth'
+            });
+        });
+    });
+});
+</script>
+
+</body>
+</html>
